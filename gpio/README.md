@@ -166,7 +166,7 @@ Parameter | Required | Restrictions | Purpose
 `Level` | | DEBUG, INFO, WARNING, ERROR | When provided, sets the logging level for the sensor.
 `CommandSrc` | X | | Destination/openHAB switch item where commands are received, expects ON/OFF. If Toggle is set all messages trigger a toggle.
 `ToggleCommandSrc` | | | Destination/openHAB string item where toggle commands are recieverd. This is intended to be used for direct connections to a sensor via the Short_Press-Dest/Long_Press-Dest parameter. Expects the string TOGGLE, when recieved the output of the actuator will get toggled e.g. from LOW to HIGH until further commands. If the parameter `SimulateButton` is configured to TRUE this parameter is ignored. If not configured no ToggleCommandSrc will be registerd.
-`ToggleDebounce` | | decimal number | The interval in seconds during which repeated toggle commands are ignored (Default 0.05 seconds)
+`ToggleDebounce` | | decimal number | The interval in seconds during which repeated toggle commands are ignored (Default 0.15 seconds)
 `Pin` | X | IO Pin | Pin to use as actuator output, using the pin numbering defined in `PinNumbering` (see below).
 `InitialState` | | ON or OFF | Optional, when set to ON the pin's state is initialized to HIGH.
 `SimulateButton` | | Boolean | When `True` simulates a button press by setting the pin to HIGH for half a second and then back to LOW. In case of `InitalState` ON it will toggle the other way around.

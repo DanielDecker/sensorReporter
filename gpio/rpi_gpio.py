@@ -294,8 +294,8 @@ class RpiGpioActuator(Actuator):
         try:
             self.toggle_debounce = float(params("ToggleDebounce"))
         except NoOptionError:
-            #default debaunce time 0.05 seconds
-            self.toggle_debounce = 0.05
+            #default debaunce time 0.15 seconds
+            self.toggle_debounce = 0.15
         self.last_toggle = datetime.datetime.fromordinal(1)
 
         #remember the current output state

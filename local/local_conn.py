@@ -93,7 +93,10 @@ class LocalConnection(Connection):
         if destination in self.registered:
             try:
                 send = message
-                if self.eq and message == self.eq:
+                # forward TOGGLE and ISO formated time messages
+                if message == "TOGGLE" or len(message) == 26 and message[10] == "T":
+                    send = "TOGGLE"
+                elif self.eq and message == self.eq:
                     send = "ON"
                 elif self.eq:
                     send = "OFF"
