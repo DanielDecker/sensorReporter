@@ -5,10 +5,10 @@ If you've used sensorReporter or mqttReporter before, this is a complete rewrite
 See the release notes below for details.
 
 A number of connections, sensors, and actuators are currently supported.
-    - Connection: responsible for publishing sensor readings and actuator results and subscribing for actuator commands.
-    - Actuators: classes that perform some action when a message is received.
-    - Polling Sensors: classes that query some device on a set polling period.
-    - Background Sensors: classes that sense for events in the background and do not require polling.
+- Connection: responsible for publishing sensor readings and actuator results and subscribing for actuator commands.
+- Actuators: classes that perform some action when a message is received.
+- Polling Sensors: classes that query some device on a set polling period.
+- Background Sensors: classes that sense for events in the background and do not require polling.
 
 Go into the subfolders for details in each subfolder's README.
 
@@ -25,6 +25,7 @@ Plug-in | Type | Purpose
 `gpio.rpi_gpio.RpiGpioActuator` | Actuator | Sets a GPIO pin to a given state on command.
 `heartbeat.heartbeat.Heartbeat` | Polling Sensor | Publishes the amount of time sensor_reporter has been up as number of msec and as DD:HH:MM:SS.
 `local.local_conn.LocalConnection` | Connection | Allows sensors to call actuators.
+`local.local_logic.LogicOr` | Actuator | Forwards commands from one or several inputs to several outputs (actuators).
 `mqtt.mqtt_conn.MqttConnection` | Connectioln | Allows Actuators to subscribe and publish and Sensors to publish results.
 `network.arp_sensor.ArpSensor` | Polling Sensor | Periodically gets and parses the ARP table for given mac addresses.
 `network.dash_sensor.DashSensor` | Background Sensor | Watches for Amazon Dash Button ARP packets.
@@ -49,10 +50,11 @@ Each individual plug-in will define it's own set of required and optional parame
 See the README files in the subfolders for details.
 
 However, some parmeters will be common.
-    - All polling sensors require a Poll parameter indicating how often in seconds to poll the sensor devices
-    - All sections require a Class parameter defining the class to load.
-    - All sensors and actuators require a Connection class containing the name of the Connection to publish/subscribe through. More than one can be defined in a comma separated list.
-    - All sections have an optional Level parameter where the logging level for that plugin or sensor_reporter overall can be set. Supported levels are DEBUG, INFO, WARNING, and ERROR.
+- All polling sensors require a Poll parameter indicating how often in seconds to poll the sensor devices
+- All sections require a Class parameter defining the class to load.
+- All sensors and actuators require a Connection class containing the name of the Connection to publish/subscribe through. More than one can be defined in a comma separated list.
+- All actuators require a CommandSrc, which has to be unique for the configured connection. E. g. if the CommandSrc `switch2` is used by several actuators only the last one will work.
+- All sections have an optional Level parameter where the logging level for that plugin or sensor_reporter overall can be set. Supported levels are DEBUG, INFO, WARNING, and ERROR.
 
 Sensors are defined in a `[SensorX]` section where `X` is a unique number.
 Connections and Actuators are defined in similarly named sections.

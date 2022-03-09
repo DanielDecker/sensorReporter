@@ -24,7 +24,7 @@ import datetime
 from RPi import GPIO
 from core.sensor import Sensor
 from core.actuator import Actuator
-from core.utils import parse_values
+from core.utils import parse_values, is_toggle_cmd
 
 def set_gpio_mode(params, log):
     """Set GPIO mode (BCM or BOARD) for all Sensors and Actuators
@@ -327,7 +327,7 @@ class RpiGpioActuator(Actuator):
                                   " which is equal to current output state. Ignoring command!",
                                   self.cmd_src, msg)
                     return
-            elif msg == "TOGGLE" or len(msg) == 26 and msg[10] == "T":
+            elif is_toggle_cmd(msg):
                 # If the string has length 26 and the char at index 10
                 # is T then its porbably a ISO 8601 formated datetime value,
                 # which was send from RpiGpioSensor

@@ -165,10 +165,14 @@ def create_device(config, section, connections):
 
         dev_conns = []
         try:
-            dev_conns = [connections[c] for c in params("Connection").split(",")]
+            dev_conns = [connections[c.strip()] for c in params("Connection").split(",")]
         except NoOptionError:
             # An Actuator doesn't always have a connection
             pass
+        except KeyError as ex:
+            logger.error("Error creating device {}!"
+                         " Probably the name of the connection {} is misspelled."
+                         .format(section, ex))
 
         return device(dev_conns, params)
     except:

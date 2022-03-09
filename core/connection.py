@@ -40,6 +40,9 @@ class Connection(ABC):
         self.registered = {}
         set_log_level(params, self.log)
 
+        #var used for 'is_local_connection()', connections by default are not local
+        self._is_local_connection = False
+
     @abstractmethod
     def publish(self, message, destination, filter_echo=False):
         """Abstarct method that must be overriden. When called, send the passed
@@ -57,3 +60,9 @@ class Connection(ABC):
         """
         self.log.info("Registering destination %s", destination)
         self.registered[destination] = handler
+
+    def is_local_connection(self):
+        """public read only property to determine if a connection is local only
+        used for local logic actuator to send messages only to local connections
+        """
+        return self._is_local_connection
