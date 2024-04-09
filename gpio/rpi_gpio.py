@@ -116,31 +116,32 @@ class RpiGpioSensor(Sensor):
                            self.name, gpio_chip,err)
 
         # Set up event detection.
+        self.event_flag:Optional[int] = None
         try:
             event_detection = dev_cfg["EventDetection"]
             event_map = {"RISING": lgpio.RISING_EDGE,
                          "FALLING": lgpio.FALLING_EDGE,
                          "BOTH": lgpio.BOTH_EDGES}
-            if event_detection not in event_map:
+            if event_detection in event_map:
+                self.event_flag = event_map[event_detection]
+            else:
                 self.log.error("Invalid event detection specified: %s, one of RISING,"
                                " FALLING, BOTH or NONE are the only allowed values. "
                                "Defaulting to NONE",
                                event_detection)
-                event_detection = "NONE"
         except KeyError:
             self.log.info("No event detection specified, falling back to polling "
                           "with interval %s", self.poll)
-            event_detection = "NONE"
 
         try:
-            if event_detection == "NONE":
+            if self.event_flag is None:
                 lgpio.gpio_claim_input(self.chip_handle, self.pin, self.pud)
             else:
                 # setup event detection
                 lgpio.gpio_claim_alert(self.chip_handle, self.pin,
-                                       event_map[event_detection], self.pud)
+                                       self.event_flag, self.pud)
                 lgpio.callback(self.chip_handle, self.pin,
-                               event_map[event_detection], self.gpio_event_cbf)
+                               self.event_flag, self.gpio_event_cbf)
         except (lgpio.error, TypeError) as err:
             self.log.error("%s could not setup GPIO chip %d, pin %d. "
                            "Make sure the pin number is correct. Error Message: %s",
@@ -148,9 +149,9 @@ class RpiGpioSensor(Sensor):
 
         self.state:int = lgpio.gpio_read(self.chip_handle, self.pin)
 
-        if self.poll < 0 and event_detection == "NONE":
+        if self.poll < 0 and self.event_flag is None:
             raise ValueError("Event detection is NONE but polling is OFF")
-        if self.poll > 0 and event_detection != "NONE":
+        if self.poll > 0 and self.event_flag is not None:
             raise ValueError(f'Event detection is {event_detection} but polling is {self.poll}')
 
         self.btn = ButtonPressCfg(dev_cfg, self)
@@ -206,19 +207,26 @@ class RpiGpioSensor(Sensor):
                             2 - watchdog timeout
             _timestamp    : Time stamp of the change event (unused)
         """
-        # NOTE: Events triggered by Event_dectection only RISING / FALLING won't
-        #       get processed since the level doesn't change.
-        #       08.04.2024 - Tested implementation for only RISING / FALLING edge
-        #       but this will produce a lot of double events from one button press,
-        #       even with debounce.
-        # Make sure the gpio level has changed and no lgpio watchdog timeout has occurred
-        if level not in (self.state, lgpio.TIMEOUT):
-            self.log.info("%s Pin %s changed from %s to %s (= %s)",
-                          self.name, gpio, self.state,
-                          level, self.values[DEFAULT_SECTION][not level])
+        # Only check if the gpio level has changed if
+        # the event detection is set to both edges or to None (no edge detection).
+        # This allows rising edge and falling edge detection to
+        # trigger a event
+        both_edges = (lgpio.BOTH_EDGES, None)
+        if self.event_flag in both_edges and level == self.state:
+            return
+        # Don't proceed if lgpio watchdog timeout has occurred
+        if level != lgpio.TIMEOUT:
             self.state = level
             self.publish_state()
-            self.btn.check_button_press(self)
+            if self.event_flag in both_edges:
+                self.log.info("%s Pin %s changed from %s to %s (= %s)",
+                              self.name, gpio, self.state,
+                              level, self.values[DEFAULT_SECTION][not level])
+                self.btn.check_button_press(self)
+            else:
+                self.log.info("%s Pin %s has been triggered by edge detection: %s (= %s)",
+                              self.name, gpio,
+                              level, self.values[DEFAULT_SECTION][not level])
 
     def publish_state(self) -> None:
         """ Publishes the current state of the pin."""
