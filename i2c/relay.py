@@ -20,7 +20,7 @@ from time import sleep
 from distutils.util import strtobool
 from typing import Any, Optional, Dict, TYPE_CHECKING
 import yaml
-import lib8relay
+import lib8relind
 from core.actuator import Actuator
 from core import utils
 if TYPE_CHECKING:
@@ -75,11 +75,11 @@ class EightRelayHAT(Actuator):
         self.relay = int(dev_cfg["Relay"])
         self.mapped_relay = relay_map[self.relay]
 
-        # default state if not configured = False = off
-        self.init_state =  dev_cfg.get("InitialState", False)
+        # default state if not configured = 0 = off
+        self.init_state =  dev_cfg.get("InitialState", 0)
 
         try:
-            lib8relay.set(self.stack, self.mapped_relay, self.init_state)
+            lib8relind.set(self.stack, self.mapped_relay, self.init_state)
         except ValueError as err:
             self.log.error("%s could not setup EightRelayHAT. "
                            "Make sure the stack and relay "
@@ -93,17 +93,24 @@ class EightRelayHAT(Actuator):
 
         # remember the current output state
         if self.sim_button:
-            self.current_state = None
+            self.current_state: Optional[int] = None
         else:
             if self.invert:
                 self.current_state = not self.init_state
             else:
                 self.current_state = self.init_state
 
-        self.log.info("Configured EightRelayHAT %s: Stack %d, Relay %d (%s)"
-                      " with SimulateButton %s and InvertOutput %s",
-                      self.name, self.stack, self.relay,
-                      onoff_to_str(self.current_state), self.sim_button, self.invert)
+        # fix type checker complaining about incompatible type Optional[int] for onoff_to_str()
+        if self.current_state is None:
+            self.log.info("Configured EightRelayHAT %s: Stack %d, Relay %d"
+                          " with SimulateButton and InvertOutput %s",
+                          self.name, self.stack, self.relay, self.invert)
+        else:
+            self.log.info("Configured EightRelayHAT %s: Stack %d, Relay %d (%s)"
+                          " without SimulateButton and InvertOutput %s",
+                          self.name, self.stack, self.relay,
+                          onoff_to_str(self.current_state), self.invert)
+
         self.log.debug("%s has following configured connections: \n%s",
                        self.name, yaml.dump(self.comm))
 
@@ -153,7 +160,7 @@ class EightRelayHAT(Actuator):
                           self.name, self.stack, self.relay,
                           onoff_to_str(self.init_state),
                           onoff_to_str(not self.init_state))
-            lib8relay.set(self.stack, self.mapped_relay, int(not self.init_state))
+            lib8relind.set(self.stack, self.mapped_relay, int(not self.init_state))
             # "sleep" will block a local connection and therefore
             # distort the time detection of button press event's
             sleep(.5)
@@ -161,7 +168,7 @@ class EightRelayHAT(Actuator):
                           self.name, self.stack, self.relay,
                           onoff_to_str(not self.init_state),
                           onoff_to_str(self.init_state))
-            lib8relay.set(self.stack, self.mapped_relay, self.init_state)
+            lib8relind.set(self.stack, self.mapped_relay, self.init_state)
 
         # Turn ON/OFF based on the message.
         else:
@@ -183,7 +190,7 @@ class EightRelayHAT(Actuator):
                 self.log.info("%s set stack %d relay %d to %s",
                               self.name, self.stack, self.relay,
                               onoff_to_str(out))
-                lib8relay.set(self.stack, self.mapped_relay, out)
+                lib8relind.set(self.stack, self.mapped_relay, out)
 
                 # publish own state back to remote connections
                 self.publish_actuator_state()

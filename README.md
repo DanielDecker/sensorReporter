@@ -182,6 +182,7 @@ This current version is a nearly complete rewrite of the previous version with a
 
 ## Breaking Changes
 
+- Swaped EightRelayHAT library, install of dependency needed (`sudo ./install_dependencies.sh i2c`) - November 2025
 - Moved Ds18x20Sensor to folder one_wire, so the Class path has changed - May 2024
 - RpiGpioSensor, RpiGpioActuator and GpioColorLED pins can only be configured using Broadcom pin numbering (GPIO numbers) - April 2024
 - The configuration file is now in YAML syntax instead of a ini file - October 2022
