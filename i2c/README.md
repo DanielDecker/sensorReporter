@@ -15,7 +15,7 @@ A received command will be sent back on all configured connections to the config
 
 This actuator communicates via the `i2c interface`, therfore the GPIO 2 and 3 should be free and cannot get accessed directly e. g. with a RpiGPIOSensor.
 The user running sensor_reporter must be in the `i2c` group to have access to the i2c interface.
-Also the library `lib8relay` must be installed to make this actuator work.
+Also the library `lib8relind` must be installed to make this actuator work.
 
 To install the dependencies run (boot partition must be writable): 
 
