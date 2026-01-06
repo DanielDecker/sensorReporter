@@ -1,6 +1,3 @@
-[apt]
-# required by DhtSensor
-libgpiod2
 [groups]
 # required by RpiGpioSensor, RpiGpioActuator, GpioColorLED
 gpio
@@ -9,3 +6,4 @@ gpio
 lgpio
 # required by DhtSensor
 adafruit-circuitpython-dht
+# sub dependency of circuitpython-dht: adafruit-blinka version > 8.67
