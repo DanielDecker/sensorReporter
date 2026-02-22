@@ -26,14 +26,14 @@ class LocalConnection(Connection):
         Actuators. One of three optional parameters can be provided:
         "OnEq": if message equal to this parameter is received publish "ON", works
                 with String messages
-        "OnGT": if the message is greater than this value, publish "ON", only works
+        "OnGt": if the message is greater than this value, publish "ON", only works
                 with messages that can be parsed to float.
-        "OnLT": if the message is less than this value, publish "ON", only works
+        "OnLt": if the message is less than this value, publish "ON", only works
                 with messages that can be parsed to float.
 
     If none of the optional parameters are present, the message is passes as is.
     All messages that don't match the comparison results in "OFF". If more than
-    one is defined, OnEQ is first and OnGT is second and OnLT is last.
+    one is defined, OnEq is first and OnGt is second and OnLt is last.
 
     This can be used to, for example, turn on an LED attached to a GPIO pin
     configured with RpiGpioActuator when a sensor has a given value.
@@ -50,10 +50,10 @@ class LocalConnection(Connection):
         conn_cfg:
             - "OnEq": any message that matches will be converted to "ON" and all
             other messages will result in "OFF".
-            - "OnGT": assumes the message is a number, if the incoming message
+            - "OnGt": assumes the message is a number, if the incoming message
             is greater than the parameter value "ON" is published; in all other
             cases "OFF" is published.
-            - "OnLT": assumes the message is a number, if the incoming message
+            - "OnLt": assumes the message is a number, if the incoming message
             is less than the parameter value "ON" is published; in all other
             cases "OFF" is published.
 
@@ -74,12 +74,12 @@ class LocalConnection(Connection):
         self.eq = conn_cfg.get("OnEq")
         try:
             if not self.eq:
-                self.gt = float(conn_cfg["OnGT"])
+                self.gt = float(conn_cfg["OnGt"])
         except KeyError:
             pass
         try:
             if not self.eq and not self.gt:
-                self.lt = float(conn_cfg["OnLT"])
+                self.lt = float(conn_cfg["OnLt"])
         except KeyError:
             pass
 
